@@ -80,10 +80,9 @@
   <script>
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
 
-    // رابط كامل للنموذج على GitHub Pages
     const URL = "https://vetisthebest22-cpu.github.io/VetEar/my_model/";
-
     let recognizer, classLabels = [];
+    let lastUpdate = {}; // لتخزين وقت آخر تحديث لكل بار
 
     async function loadModel() {
       const checkpointURL = URL + "model.json";
@@ -108,20 +107,25 @@
               <div id="${label}-bar" class="bar-animation h-6 rounded-full shadow-sm bg-blue-500" style="width:0%"></div>
             </div>
           </div>`;
+        lastUpdate[label] = 0; // تهيئة وقت آخر تحديث
       });
     }
 
     async function startAnalysis() {
       if (!recognizer) await loadModel();
       recognizer.listen(result => {
-        const scores = result.scores.map(s => (s * 100).toFixed(1));
+        const now = Date.now();
+        const scores = result.scores.map(s => (s * 100).toFixed(2)); // منزلتين عشريتين
         let total = 0;
         classLabels.forEach((label, i) => {
-          document.getElementById(label + "-val").textContent = scores[i] + "%";
-          document.getElementById(label + "-bar").style.width = scores[i] + "%";
+          if (now - lastUpdate[label] > 10000) { // تحديث كل 10 ثواني
+            document.getElementById(label + "-val").textContent = scores[i] + "%";
+            document.getElementById(label + "-bar").style.width = scores[i] + "%";
+            lastUpdate[label] = now;
+          }
           total += parseFloat(scores[i]);
         });
-        document.getElementById("total-sounds").textContent = total.toFixed(1) + "%";
+        document.getElementById("total-sounds").textContent = total.toFixed(2) + "%";
         document.getElementById("confidence").textContent = "High (" + Math.max(...scores) + "%)";
       }, {
         includeSpectrogram: true,
