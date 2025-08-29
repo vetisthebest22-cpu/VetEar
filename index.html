@@ -1,111 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VetPulse - AI Veterinary Sound Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
-
 <style>
-    /* Popup style */
-    #sound-popup {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #7C3AED, #10B981);
-        color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(124,58,237,0.3);
-        display: none;
-        z-index: 50;
-        min-width: 250px;
-        font-weight: 600;
-    }
+    /* Basic resets and fonts */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',sans-serif;background:#f9f9f9;min-height:100vh;position:relative;overflow-x:hidden;}
 
-    #sound-popup .close-btn {
-        position: absolute;
-        top: 5px;
-        right: 10px;
-        cursor: pointer;
-        font-weight: bold;
-    }
+    /* Header */
+    .header{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);padding:1rem 2rem;box-shadow:0 4px 20px rgba(124,58,237,0.1);position:relative;z-index:10;}
+    .logo{font-size:1.5rem;font-weight:700;color:#7C3AED;}
+    .main-container{max-width:1200px;margin:0 auto;padding:3rem 2rem;position:relative;z-index:5;text-align:center;}
+
+    /* Microphone button */
+    .mic-button{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#10B981);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:1rem auto;box-shadow:0 8px 25px rgba(124,58,237,0.3);animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 0 rgba(124,58,237,0.4);}50%{box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 20px rgba(124,58,237,0);}}
+
+    /* Radial progress circles */
+    .radial-progress{position:relative;width:80px;height:80px;margin:1rem auto;}
+    .progress-circle{width:80px;height:80px;border-radius:50%;background:conic-gradient(#10B981 0deg,#E5E7EB 0deg);display:flex;align-items:center;justify-content:center;position:relative;}
+    .progress-circle::before{content:'';position:absolute;width:60px;height:60px;background:white;border-radius:50%;}
+    .progress-text{position:absolute;font-weight:700;color:#7C3AED;z-index:1;}
+
+    /* Sound popup */
+    #sound-popup{position:fixed;top:20px;right:20px;background:white;padding:1rem 1.5rem;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.15);z-index:50;display:none;animation:fadeIn 0.5s;}
+    #sound-popup button{position:absolute;top:5px;right:8px;background:none;border:none;font-size:1.2rem;cursor:pointer;}
+    @keyframes fadeIn{0%{opacity:0;transform:translateY(-10px);}100%{opacity:1;transform:translateY(0);}}
+
+    /* Footer */
+    .footer{background:rgba(255,255,255,0.95);padding:2rem;text-align:center;margin-top:3rem;}
 </style>
+</head>
+<body>
 
+<header class="header"><div class="logo">VetPulse AI</div></header>
+
+<main class="main-container">
+    <h1>VetPulse AI Analysis</h1>
+    <p>Advanced veterinary sound analysis powered by AI</p>
+    <button class="mic-button" onclick="toggleListening()" aria-label="Start audio analysis">
+        🎤
+    </button>
+
+    <div class="radial-progress">
+        <div class="progress-circle" id="noise-progress"><span class="progress-text" id="noise-text">0%</span></div>
+        <p>Background Noise</p>
+    </div>
+    <div class="radial-progress">
+        <div class="progress-circle" id="human-progress"><span class="progress-text" id="human-text">0%</span></div>
+        <p>Human Normal</p>
+    </div>
+    <div class="radial-progress">
+        <div class="progress-circle" id="animal-progress"><span class="progress-text" id="animal-text">0%</span></div>
+        <p>Small Animal Normal</p>
+    </div>
+    <div class="radial-progress">
+        <div class="progress-circle" id="wheeze-progress"><span class="progress-text" id="wheeze-text">0%</span></div>
+        <p>Wheezing</p>
+    </div>
+</main>
+
+<!-- Sound popup -->
 <div id="sound-popup">
-    <span class="close-btn" onclick="document.getElementById('sound-popup').style.display='none'">✖</span>
-    <div id="sound-text"></div>
+    <button onclick="closePopup()">✖</button>
+    <div id="popup-text"></div>
 </div>
 
+<footer class="footer">&copy; 2024 VetPulse. Powered by AI VetTech.</footer>
+
 <script>
-    let recognizer;
-    let isListening = false;
+let recognizer;
+let isListening = false;
 
-    async function initAIModel() {
-        const MODEL_URL = "./my_model/";
-        recognizer = speechCommands.create("BROWSER_FFT", undefined, MODEL_URL + "model.json", MODEL_URL + "metadata.json");
-        await recognizer.ensureModelLoaded();
-        console.log("AI Model loaded.");
-    }
+async function initAI() {
+    const URL = "./my_model/";
+    const checkpointURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-    async function toggleListening() {
-        const button = document.querySelector('.mic-button');
-        isListening = !isListening;
+    recognizer = speechCommands.create("BROWSER_FFT", undefined, checkpointURL, metadataURL);
+    await recognizer.ensureModelLoaded();
+    console.log("AI model loaded");
+}
 
-        if (!recognizer) await initAIModel();
+function toggleListening() {
+    if(!recognizer) { alert("AI model not loaded yet"); return; }
 
-        if (isListening) {
-            button.style.animation = 'pulse 0.5s ease-in-out infinite';
-            button.style.background = 'linear-gradient(135deg, #10B981, #7C3AED)';
-            startListening();
-        } else {
-            button.style.animation = 'pulse 2s ease-in-out infinite';
-            button.style.background = 'linear-gradient(135deg, #7C3AED, #10B981)';
-            if (recognizer) recognizer.stopListening();
-        }
-    }
+    isListening = !isListening;
+    const button = document.querySelector('.mic-button');
+    button.style.background = isListening ? "linear-gradient(135deg,#10B981,#7C3AED)" : "linear-gradient(135deg,#7C3AED,#10B981)";
 
-    function startListening() {
-        recognizer.listen(result => {
+    if(isListening){
+        recognizer.listen(result=>{
             const scores = result.scores;
             const labels = recognizer.wordLabels();
-            // Find highest probability
-            let maxIndex = 0;
-            let maxScore = 0;
-            scores.forEach((s, i) => { if(s > maxScore){ maxScore=s; maxIndex=i; }});
-
+            scores.forEach((s,i)=>{
+                const percentage = (s*100).toFixed(1);
+                if(labels[i]==="Background Noise") updateProgress('noise-progress','noise-text',percentage);
+                if(labels[i]==="Human - Normal") updateProgress('human-progress','human-text',percentage);
+                if(labels[i]==="Small Animal - Normal") updateProgress('animal-progress','animal-text',percentage);
+                if(labels[i]==="Wheezing") updateProgress('wheeze-progress','wheeze-text',percentage);
+            });
+            // Show popup with highest probability
+            const maxIndex = scores.indexOf(Math.max(...scores));
             const detectedSound = labels[maxIndex];
-            const percentage = (maxScore*100).toFixed(1);
-
-            // Show popup
-            const popup = document.getElementById('sound-popup');
-            const text = document.getElementById('sound-text');
-            text.textContent = `The sound is "${detectedSound}" with Percentage ${percentage}%`;
-            popup.style.display = 'block';
-
-            // Update radial progress bars
-            updateProgress('noise-progress','noise-text', Math.round(scores[labels.indexOf('Background Noise')]*100 || 0));
-            updateProgress('human-progress','human-text', Math.round(scores[labels.indexOf('Human - Normal')]*100 || 0));
-            updateProgress('animal-progress','animal-text', Math.round(scores[labels.indexOf('Small Animal - Normal')]*100 || 0));
-            updateProgress('wheeze-progress','wheeze-text', Math.round(scores[labels.indexOf('Wheezing')]*100 || 0));
-
-            // Update recommendation based on max class
-            const recText = document.getElementById('recommendation-text');
-            if(detectedSound === 'Wheezing') {
-                recText.textContent = "⚠️ Wheezing detected! Recommend immediate veterinary attention.";
-            } else if(detectedSound === 'Small Animal - Normal') {
-                recText.textContent = "Healthy small animal detected. Continue regular monitoring.";
-            } else {
-                recText.textContent = "Background or human noise detected. Try focusing on the animal's sound.";
-            }
-        }, {
+            const detectedPerc = (scores[maxIndex]*100).toFixed(1);
+            showPopup(`The sound is: ${detectedSound}<br>With Percentage: ${detectedPerc}%`);
+        },{
             includeSpectrogram:true,
             probabilityThreshold:0,
-            overlapFactor:0.5
+            overlapFactor:0.5,
+            invokeCallbackOnNoiseAndUnknown:true
         });
+    } else {
+        recognizer.stopListening();
+        closePopup();
     }
+}
 
-    // Initialize progress bars with default values
-    document.addEventListener('DOMContentLoaded', function() {
-        updateProgress('noise-progress', 'noise-text', 15);
-        updateProgress('human-progress', 'human-text', 25);
-        updateProgress('animal-progress', 'animal-text', 85);
-        updateProgress('wheeze-progress', 'wheeze-text', 8);
-    });
+function updateProgress(circleId,textId,percent){
+    const circle = document.getElementById(circleId);
+    const text = document.getElementById(textId);
+    const degrees = (percent/100)*360;
+    circle.style.background = `conic-gradient(#10B981 ${degrees}deg,#E5E7EB ${degrees}deg)`;
+    text.textContent = `${percent}%`;
+}
+
+function showPopup(message){
+    const popup = document.getElementById('sound-popup');
+    const popupText = document.getElementById('popup-text');
+    popupText.innerHTML = message;
+    popup.style.display = 'block';
+}
+
+function closePopup(){
+    document.getElementById('sound-popup').style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', initAI);
 </script>
 
+</body>
+</html>
