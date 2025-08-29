@@ -6,91 +6,36 @@
 <title>VetPulse - AI Veterinary Sound Analysis</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* --- حافظت على كل الـ CSS الأصلي --- */
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',sans-serif; background:#fff; min-height:100vh; position:relative; overflow-x:hidden; }
-.bg-animation { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:0.1; }
-.floating-icon { position:absolute; animation:float 6s ease-in-out infinite; font-size:24px; color:#7C3AED; }
-.floating-icon:nth-child(1) { top:10%; left:10%; animation-delay:0s; }
-.floating-icon:nth-child(2) { top:20%; right:15%; animation-delay:1s; }
-.floating-icon:nth-child(3) { top:60%; left:5%; animation-delay:2s; }
-.floating-icon:nth-child(4) { bottom:30%; right:10%; animation-delay:3s; }
-.floating-icon:nth-child(5) { bottom:10%; left:20%; animation-delay:4s; }
-@keyframes float { 0%,100%{ transform:translateY(0px) rotate(0deg); } 50%{ transform:translateY(-20px) rotate(5deg); } }
-/* Header */
-.header { background: rgba(255,255,255,0.95); backdrop-filter:blur(10px); padding:1rem 2rem; box-shadow:0 4px 20px rgba(124,58,237,0.1); position:relative; z-index:10; }
-.nav-container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; }
-.logo { display:flex; align-items:center; gap:12px; font-size:1.5rem; font-weight:700; color:#7C3AED; }
-.logo-icon { width:40px; height:40px; animation:heartbeat 2s ease-in-out infinite; }
-@keyframes heartbeat { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.1); } }
-.nav-menu { display:flex; gap:2rem; list-style:none; }
-.nav-menu a { text-decoration:none; color:#4B5563; font-weight:500; transition:color 0.3s ease; }
-.nav-menu a:hover { color:#7C3AED; }
-/* Main Content */
-.main-container { max-width:1200px; margin:0 auto; padding:3rem 2rem; position:relative; z-index:5; }
-.hero-section { text-align:center; margin-bottom:3rem; }
-.hero-title { font-size:3rem; font-weight:700; color:#7C3AED; margin-bottom:1rem; }
-.hero-subtitle { font-size:1.2rem; color:#6B7280; margin-bottom:2rem; }
-.microphone-container { margin:2rem 0; }
-.mic-button, .stop-button { width:80px; height:80px; border-radius:50%; background: linear-gradient(135deg, #7C3AED,#10B981); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; margin:0 auto; box-shadow:0 8px 25px rgba(124,58,237,0.3); transition:all 0.3s ease; animation:pulse 2s ease-in-out infinite; }
-.stop-button { background: #EF4444; margin-top:1rem; }
-.mic-button:hover, .stop-button:hover { transform:scale(1.1); box-shadow:0 12px 35px rgba(124,58,237,0.4); }
-@keyframes pulse { 0%,100{ box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 0 rgba(124,58,237,0.4); } 50%{ box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 20px rgba(124,58,237,0); } }
-.analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-top:3rem; }
-.progress-section { display:flex; flex-direction:column; gap:2rem; }
-.progress-item { background: rgba(255,255,255,0.9); padding:1.5rem; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.1); display:flex; align-items:center; gap:1.5rem; transition:all 0.3s ease; }
-.progress-item:hover { transform:translateY(-5px); box-shadow:0 15px 35px rgba(0,0,0,0.15); }
-.radial-progress { position:relative; width:80px; height:80px; }
-.progress-circle { width:80px; height:80px; border-radius:50%; background:conic-gradient(#10B981 0deg, #E5E7EB 0deg); display:flex; align-items:center; justify-content:center; position:relative; animation:breathe 3s ease-in-out infinite; }
-@keyframes breathe { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.05); } }
-.progress-circle::before { content:''; position:absolute; width:60px; height:60px; background:white; border-radius:50%; }
-.progress-text { position:absolute; font-weight:700; color:#7C3AED; z-index:1; }
-.progress-info h3 { font-size:1.1rem; font-weight:600; color:#374151; margin-bottom:0.5rem; }
-.progress-info p { color:#6B7280; font-size:0.9rem; }
-.descriptions-section { display:flex; flex-direction:column; gap:1.5rem; }
-.description-card { background: rgba(255,255,255,0.9); padding:1.5rem; border-radius:20px; box-shadow:0 8px 25px rgba(0,0,0,0.1); transition:all 0.3s ease; border-left:4px solid #7C3AED; }
-.description-card:hover { transform:translateX(10px); box-shadow:0 15px 35px rgba(124,58,237,0.2); }
-.description-card h3 { color:#7C3AED; font-weight:600; margin-bottom:0.5rem; }
-.description-card p { color:#6B7280; line-height:1.6; }
-.recommendations { background: linear-gradient(135deg, #7C3AED,#10B981); color:white; padding:2rem; border-radius:20px; margin-top:2rem; text-align:center; box-shadow:0 15px 35px rgba(124,58,237,0.3); position:relative; }
-.recommendations h3 { font-size:1.5rem; margin-bottom:1rem; animation:glow 2s ease-in-out infinite alternate; }
-@keyframes glow { from { text-shadow:0 0 5px rgba(255,255,255,0.5); } to { text-shadow:0 0 20px rgba(255,255,255,0.8); } }
-/* Pop-up */
-#popup { position:fixed; top:20%; right:0; width:200px; background:white; border-radius:10px; padding:1rem; box-shadow:0 5px 20px rgba(0,0,0,0.2); display:none; z-index:20; }
-#popup h4 { margin-bottom:0.5rem; color:#7C3AED; }
-#popup p { margin-bottom:0.3rem; font-size:0.9rem; color:#374151; }
-/* Footer */
-.footer { background: rgba(255,255,255,0.95); padding:2rem; text-align:center; position:relative; z-index:10; margin-top:3rem; }
-.footer-content { max-width:1200px; margin:0 auto; }
-.paw-animation { position:absolute; bottom:0; left:0; width:100%; height:20px; overflow:hidden; }
-.paw { position:absolute; bottom:5px; font-size:16px; color:#7C3AED; animation:march 8s linear infinite; }
-.paw:nth-child(1) { animation-delay:0s; }
-.paw:nth-child(2) { animation-delay:2s; }
-.paw:nth-child(3) { animation-delay:4s; }
-.paw:nth-child(4) { animation-delay:6s; }
-@keyframes march { 0% { left:-50px; } 100% { left:100%; } }
-@media (max-width:768px){ .analysis-grid{grid-template-columns:1fr; gap:2rem;} .hero-title{font-size:2rem;} .nav-menu{display:none;} }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#fff;min-height:100vh;position:relative;overflow-x:hidden;}
+.header{background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);padding:1rem 2rem;box-shadow:0 4px 20px rgba(124,58,237,0.1);}
+.nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
+.logo{font-size:1.5rem;font-weight:700;color:#7C3AED;}
+.nav-menu{display:flex;gap:2rem;list-style:none;}
+.nav-menu a{text-decoration:none;color:#4B5563;font-weight:500;transition:color 0.3s ease;}
+.nav-menu a:hover{color:#7C3AED;}
+.main-container{max-width:1200px;margin:0 auto;padding:3rem 2rem;}
+.hero-section{text-align:center;margin-bottom:3rem;}
+.hero-title{font-size:3rem;font-weight:700;color:#7C3AED;margin-bottom:1rem;}
+.hero-subtitle{font-size:1.2rem;color:#6B7280;margin-bottom:2rem;}
+.microphone-container{margin:2rem 0;}
+.mic-button{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#10B981);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;box-shadow:0 8px 25px rgba(124,58,237,0.3);transition:all 0.3s ease;animation:pulse 2s ease-in-out infinite;font-size:1.5rem;}
+@keyframes pulse{0%,100%{box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 0 rgba(124,58,237,0.4);}50%{box-shadow:0 8px 25px rgba(124,58,237,0.3),0 0 0 20px rgba(124,58,237,0);}}
+.analysis-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3rem;margin-top:3rem;}
+.progress-item{display:flex;align-items:center;gap:1.5rem;}
+.radial-progress{position:relative;width:80px;height:80px;}
+.progress-circle{width:80px;height:80px;border-radius:50%;background:conic-gradient(#E5E7EB 0deg,#E5E7EB 360deg);display:flex;align-items:center;justify-content:center;position:relative;}
+.progress-circle::before{content:'';position:absolute;width:60px;height:60px;background:white;border-radius:50%;}
+.progress-text{position:absolute;font-weight:700;color:#7C3AED;z-index:1;}
+.progress-info h3{font-size:1.1rem;font-weight:600;color:#374151;margin-bottom:0.5rem;}
+.progress-info p{color:#6B7280;font-size:0.9rem;}
+@media (max-width:768px){.analysis-grid{grid-template-columns:1fr;gap:2rem;}.hero-title{font-size:2rem;}.nav-menu{display:none;}}
 </style>
 </head>
 <body>
-<div class="bg-animation">
-<div class="floating-icon">🐕</div>
-<div class="floating-icon">🩺</div>
-<div class="floating-icon">🐱</div>
-<div class="floating-icon">💓</div>
-<div class="floating-icon">🐾</div>
-</div>
-
 <header class="header">
 <nav class="nav-container">
-<div class="logo">
-<svg class="logo-icon" viewBox="0 0 40 40" fill="none">
-<path d="M20 35C20 35 32 25 32 15C32 8.5 26.5 3 20 3S8 8.5 8 15C8 25 20 35 20 35Z" fill="#7C3AED"/>
-<circle cx="20" cy="15" r="5" fill="white"/>
-<path d="M15 15L18 18L25 11" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-VetPulse
-</div>
+<div class="logo">VetPulse</div>
 <ul class="nav-menu">
 <li><a href="#home">Home</a></li>
 <li><a href="#analysis">Analysis</a></li>
@@ -103,18 +48,16 @@ VetPulse
 <main class="main-container">
 <section class="hero-section">
 <h1 class="hero-title">VetPulse AI Analysis</h1>
-<p class="hero-subtitle">Advanced veterinary sound analysis powered by artificial intelligence</p>
+<p class="hero-subtitle">Advanced veterinary sound analysis powered by AI</p>
 <div class="microphone-container">
-<button class="mic-button" onclick="startListening()">🎤</button>
-<button class="stop-button" onclick="stopListening()">✖️</button>
+<button class="mic-button" onclick="toggleListening()">🎤</button>
 </div>
 </section>
 
 <div class="analysis-grid">
-<div class="progress-section">
 <div class="progress-item">
 <div class="radial-progress"><div class="progress-circle" id="noise-progress"><span class="progress-text" id="noise-text">0%</span></div></div>
-<div class="progress-info"><h3>Background Noise</h3><p>Environmental sounds detected</p></div>
+<div class="progress-info"><h3>Background Noise</h3><p>Environmental sounds</p></div>
 </div>
 <div class="progress-item">
 <div class="radial-progress"><div class="progress-circle" id="human-progress"><span class="progress-text" id="human-text">0%</span></div></div>
@@ -122,43 +65,19 @@ VetPulse
 </div>
 <div class="progress-item">
 <div class="radial-progress"><div class="progress-circle" id="animal-progress"><span class="progress-text" id="animal-text">0%</span></div></div>
-<div class="progress-info"><h3>Small Animal - Normal</h3><p>Healthy animal breathing patterns</p></div>
+<div class="progress-info"><h3>Small Animal - Normal</h3><p>Healthy animal breathing</p></div>
 </div>
 <div class="progress-item">
 <div class="radial-progress"><div class="progress-circle" id="wheeze-progress"><span class="progress-text" id="wheeze-text">0%</span></div></div>
-<div class="progress-info"><h3>Wheezing</h3><p>Respiratory distress indicators</p></div>
+<div class="progress-info"><h3>Wheezing</h3><p>Respiratory distress</p></div>
 </div>
 </div>
-
-<div class="descriptions-section">
-<div class="description-card"><h3>🔇 Background Noise Analysis</h3><p>Filters out environmental sounds like traffic, wind, and room noise.</p></div>
-<div class="description-card"><h3>👤 Human Respiratory Patterns</h3><p>Detects human breathing sounds to distinguish handler vs patient sounds.</p></div>
-<div class="description-card"><h3>🐾 Small Animal Health Assessment</h3><p>Analyzes normal breathing patterns in cats, dogs, and other small animals.</p></div>
-<div class="description-card"><h3>⚠️ Respiratory Distress Detection</h3><p>Identifies wheezing, labored breathing, and other signs of distress.</p></div>
-</div>
-</div>
-
-<div class="recommendations">
-<h3>🎯 AI Recommendation</h3>
-<p id="recommendation-text">Waiting for analysis...</p>
-</div>
-
-<div id="popup"><h4>Live Analysis</h4><p id="popup-noise">Noise: 0%</p><p id="popup-human">Human: 0%</p><p id="popup-animal">Animal: 0%</p><p id="popup-wheeze">Wheeze: 0%</p></div>
 </main>
-
-<footer class="footer">
-<div class="footer-content">
-<p>&copy; 2024 VetPulse. Powered by AI VetTech. All rights reserved.</p>
-<div class="paw-animation">
-<div class="paw">🐾</div><div class="paw">🐾</div><div class="paw">🐾</div><div class="paw">🐾</div>
-</div>
-</div>
-</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/audio@0.8/dist/teachablemachine-audio.min.js"></script>
 <script>
-let model, mic, listening=false;
+let model,mic,listening=false;
 
 async function initAI(){
     const URL='./my model/';
@@ -166,37 +85,27 @@ async function initAI(){
     mic=new tmAudio.AudioListener();
 }
 
-async function startListening(){
-    if(listening) return;
+async function toggleListening(){
+    if(listening){
+        await mic.stop();
+        listening=false;
+        return;
+    }
     listening=true;
-    document.getElementById('popup').style.display='block';
     await mic.start();
-    setTimeout(analyzeSound,10000); // تسجيل 10 ثواني
-}
-
-async function stopListening(){
-    if(!listening) return;
-    listening=false;
-    await mic.stop();
-    document.getElementById('popup').style.display='none';
-}
-
-async function analyzeSound(){
-    if(!listening) return;
-    const predictions=await model.predict(mic);
-    predictions.forEach(pred=>{
-        const perc=Math.round(pred.probability*100);
-        if(pred.className==='Background Noise') updateProgress('noise-progress','noise-text',perc);
-        if(pred.className==='Human - Normal') updateProgress('human-progress','human-text',perc);
-        if(pred.className==='Small Animal - Normal') updateProgress('animal-progress','animal-text',perc);
-        if(pred.className==='Wheezing') updateProgress('wheeze-progress','wheeze-text',perc);
-    });
-    document.getElementById('popup-noise').textContent=`Noise: ${document.getElementById('noise-text').textContent}`;
-    document.getElementById('popup-human').textContent=`Human: ${document.getElementById('human-text').textContent}`;
-    document.getElementById('popup-animal').textContent=`Animal: ${document.getElementById('animal-text').textContent}`;
-    document.getElementById('popup-wheeze').textContent=`Wheeze: ${document.getElementById('wheeze-text').textContent}`;
-    document.getElementById('recommendation-text').textContent='Analysis completed.';
-    listening=false;
+    let seconds=0;
+    const interval=setInterval(async ()=>{
+        seconds++;
+        const predictions=await model.predict(mic);
+        predictions.forEach(pred=>{
+            const perc=Math.round(pred.probability*100);
+            if(pred.className==='Background Noise') updateProgress('noise-progress','noise-text',perc);
+            if(pred.className==='Human - Normal') updateProgress('human-progress','human-text',perc);
+            if(pred.className==='Small Animal - Normal') updateProgress('animal-progress','animal-text',perc);
+            if(pred.className==='Wheezing') updateProgress('wheeze-progress','wheeze-text',perc);
+        });
+        if(seconds>=10){ clearInterval(interval); listening=false; await mic.stop(); }
+    },1000);
 }
 
 function updateProgress(elId,textId,perc){
@@ -211,3 +120,5 @@ window.addEventListener('DOMContentLoaded',initAI);
 </script>
 </body>
 </html>
+
+
