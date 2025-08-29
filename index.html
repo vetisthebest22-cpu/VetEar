@@ -82,7 +82,8 @@
 
     const URL = "https://vetisthebest22-cpu.github.io/VetEar/my_model/";
     let recognizer, classLabels = [];
-    let lastUpdate = {}; // لتخزين وقت آخر تحديث لكل بار
+    let lastScores = []; // لتخزين آخر قيم لكل بار
+    let updateInterval = 10000; // 10 ثواني
 
     async function loadModel() {
       const checkpointURL = URL + "model.json";
@@ -107,34 +108,37 @@
               <div id="${label}-bar" class="bar-animation h-6 rounded-full shadow-sm bg-blue-500" style="width:0%"></div>
             </div>
           </div>`;
-        lastUpdate[label] = 0; // تهيئة وقت آخر تحديث
       });
     }
 
     async function startAnalysis() {
       if (!recognizer) await loadModel();
+
+      // الاستماع وتحديث lastScores فقط
       recognizer.listen(result => {
-        const now = Date.now();
-        const scores = result.scores.map(s => (s * 100).toFixed(2)); // منزلتين عشريتين
-        let total = 0;
-        classLabels.forEach((label, i) => {
-          if (now - lastUpdate[label] > 10000) { // تحديث كل 10 ثواني
-            document.getElementById(label + "-val").textContent = scores[i] + "%";
-            document.getElementById(label + "-bar").style.width = scores[i] + "%";
-            lastUpdate[label] = now;
-          }
-          total += parseFloat(scores[i]);
-        });
-        document.getElementById("total-sounds").textContent = total.toFixed(2) + "%";
-        document.getElementById("confidence").textContent = "High (" + Math.max(...scores) + "%)";
+        lastScores = result.scores.map(s => (s * 100).toFixed(2)); // منزلتين عشريتين
       }, {
         includeSpectrogram: true,
         probabilityThreshold: 0.0,
         overlapFactor: 0.5
       });
+
+      // تحديث DOM كل 10 ثواني
+      setInterval(() => {
+        if (lastScores.length === 0) return;
+        let total = 0;
+        classLabels.forEach((label, i) => {
+          document.getElementById(label + "-val").textContent = lastScores[i] + "%";
+          document.getElementById(label + "-bar").style.width = lastScores[i] + "%";
+          total += parseFloat(lastScores[i]);
+        });
+        document.getElementById("total-sounds").textContent = total.toFixed(2) + "%";
+        document.getElementById("confidence").textContent = "High (" + Math.max(...lastScores) + "%)";
+      }, updateInterval);
     }
 
     loadModel();
   </script>
 </body>
 </html>
+
