@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VETai - Medical Auscultation Analysis Results</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands@0.4.0/dist/speech-commands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/speech-commands/dist/speech-commands.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; }
@@ -55,86 +55,4 @@
       </div>
 
       <!-- Right Side - Explanations -->
-      <div class="bg-white rounded-xl shadow-lg p-8">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Sound Classifications</h2>
-        <div class="space-y-6">
-          <div class="border-l-4 border-red-500 pl-4 py-3">
-            <h3 class="font-semibold text-gray-800 mb-2">Background Noise</h3>
-            <p class="text-gray-600 text-sm">Refers to surrounding noise during auscultation, including environment, equipment, or movement artifacts.</p>
-          </div>
-          <div class="border-l-4 border-green-500 pl-4 py-3">
-            <h3 class="font-semibold text-gray-800 mb-2">Human – Normal</h3>
-            <p class="text-gray-600 text-sm">Typical lung/airway sounds in a healthy person without abnormal breath sounds.</p>
-          </div>
-          <div class="border-l-4 border-blue-500 pl-4 py-3">
-            <h3 class="font-semibold text-gray-800 mb-2">Small Animal – Normal</h3>
-            <p class="text-gray-600 text-sm">Normal respiratory sounds of small animals, showing clear airways and healthy lung function.</p>
-          </div>
-          <div class="border-l-4 border-orange-500 pl-4 py-3">
-            <h3 class="font-semibold text-gray-800 mb-2">Wheezing</h3>
-            <p class="text-gray-600 text-sm">High-pitched whistling during inhalation/exhalation, caused by narrowed or obstructed airways.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-8 text-center text-sm text-gray-500">
-      <p>AI-powered auscultation analysis • Results generated on <span id="currentDate"></span></p>
-    </div>
-  </div>
-
-  <script>
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
-
-    const URL = "./my_model/";
-    let recognizer, classLabels = [];
-
-    async function loadModel() {
-      const checkpointURL = URL + "model.json";
-      const metadataURL = URL + "metadata.json";
-      recognizer = speechCommands.create("BROWSER_FFT", undefined, checkpointURL, metadataURL);
-      await recognizer.ensureModelLoaded();
-      classLabels = recognizer.wordLabels();
-      renderBars();
-    }
-
-    function renderBars() {
-      const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = "";
-      classLabels.forEach(label => {
-        resultsDiv.innerHTML += `
-          <div class="sound-result">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-medium text-gray-700">${label}</span>
-              <span id="${label}-val" class="text-lg font-bold">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-              <div id="${label}-bar" class="bar-animation h-6 rounded-full shadow-sm bg-blue-500" style="width:0%"></div>
-            </div>
-          </div>`;
-      });
-    }
-
-    async function startAnalysis() {
-      if (!recognizer) await loadModel();
-      recognizer.listen(result => {
-        const scores = result.scores.map(s => (s * 100).toFixed(1));
-        let total = 0;
-        classLabels.forEach((label, i) => {
-          document.getElementById(label + "-val").textContent = scores[i] + "%";
-          document.getElementById(label + "-bar").style.width = scores[i] + "%";
-          total += parseFloat(scores[i]);
-        });
-        document.getElementById("total-sounds").textContent = total.toFixed(1) + "%";
-        document.getElementById("confidence").textContent = "High (" + Math.max(...scores) + "%)";
-      }, {
-        includeSpectrogram: true,
-        probabilityThreshold: 0.0,
-        overlapFactor: 0.5
-      });
-    }
-
-    loadModel();
-  </script>
-</body>
-</html>
+      <div class=
