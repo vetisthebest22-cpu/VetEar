@@ -492,32 +492,43 @@
             <h3>🎯 AI Recommendation</h3>
             <p id="recommendation-text">Based on the analysis, this appears to be a healthy small animal with normal respiratory patterns. Continue regular monitoring and maintain current care routine.</p>
             <div class="sparkle" style="top: 10px; right: 20px;"></div>
-            <div class="sparkle" style="bottom: 20px; left: 15px;"></div>
+            <div class="sparkle" style="bottom: 15px; left: 30px; animation-delay: 0.5s;"></div>
+            <div class="sparkle" style="top: 50%; left: 50%; animation-delay: 1s;"></div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2025 VetPulse AI. All rights reserved.</p>
+            &copy; 2025 VetPulse. All Rights Reserved.
         </div>
         <div class="paw-animation">
-            <span class="paw">🐾</span>
-            <span class="paw">🐾</span>
-            <span class="paw">🐾</span>
-            <span class="paw">🐾</span>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
+            <div class="paw">🐾</div>
         </div>
     </footer>
 
-    <!-- Existing inline script -->
+    <!-- Scripts -->
     <script>
-        // Your existing JS logic for animations and progress updates
+        // Script internal to fix toggleListening reference
+        let listening = false;
+
+        function toggleListening() {
+            listening = !listening;
+            const button = document.querySelector('.mic-button');
+            if(listening) {
+                button.style.background = 'linear-gradient(135deg, #F59E0B, #EF4444)';
+                console.log('Listening started...');
+            } else {
+                button.style.background = 'linear-gradient(135deg, #7C3AED, #10B981)';
+                console.log('Listening stopped...');
+            }
+        }
     </script>
 
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'976f6ed5d2b532ae',t:'MTc1NjUwNTk5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-
-    <!-- Added new script safely -->
-    <script src="your-new-script.js"></script>
+    <!-- External script reference kept to avoid 404 -->
+    <script src="main.js"></script>
 </body>
 </html>
-
