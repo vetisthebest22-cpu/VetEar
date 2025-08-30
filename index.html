@@ -563,29 +563,28 @@
         let isListening = false;
         let recognizer = null;
         
-        // AI Model Configuration - Direct GitHub Pages URL
-        // Replace 'username' with your actual GitHub username
-        const URL = "https://vetisthebest22-cpu.github.io/VetEar/my_model/";
+        // AI Model Configuration - Using your exact Teachable Machine setup
+        const URL = "./my_model/";
         
         async function createModel() {
             try {
-                // Ensure we're using the full HTTPS URL, not relative paths
-                const baseURL = URL.startsWith('http') ? URL : window.location.origin + '/' + URL.replace('./', '');
-                const checkpointURL = baseURL + "model.json";
-                const metadataURL = baseURL + "metadata.json";
+                const checkpointURL = URL + "model.json"; // model topology
+                const metadataURL = URL + "metadata.json"; // model metadata
 
-                console.log("Loading AI model from:", baseURL);
+                console.log("Loading AI model from:", URL);
                 console.log("Model URL:", checkpointURL);
                 console.log("Metadata URL:", metadataURL);
 
                 const recognizer = speechCommands.create(
-                    "BROWSER_FFT",
-                    undefined,
+                    "BROWSER_FFT", // fourier transform type, not useful to change
+                    undefined, // speech commands vocabulary feature, not useful for your models
                     checkpointURL,
                     metadataURL);
 
+                // check that model and metadata are loaded via HTTPS requests.
                 await recognizer.ensureModelLoaded();
                 console.log("✅ AI Model loaded successfully!");
+                console.log("Available class labels:", recognizer.wordLabels());
                 return recognizer;
             } catch (error) {
                 console.error("❌ Model loading failed:", error.message);
@@ -658,10 +657,19 @@
         function startRealAnalysis() {
             const classLabels = recognizer.wordLabels();
             
+            // listen() takes two arguments:
+            // 1. A callback function that is invoked anytime a word is recognized.
+            // 2. A configuration object with adjustable fields
             recognizer.listen(result => {
-                const scores = result.scores;
+                const scores = result.scores; // probability of prediction for each class
                 
-                // Map AI results to our UI categories
+                // Debug: Show raw predictions in console
+                console.log("Raw AI predictions:");
+                for (let i = 0; i < classLabels.length; i++) {
+                    console.log(`${classLabels[i]}: ${scores[i].toFixed(3)}`);
+                }
+                
+                // Map AI results to our UI categories using exact class names
                 const mappedResults = mapAIResultsToUI(classLabels, scores);
                 
                 // Update progress bars with real AI data
@@ -674,19 +682,10 @@
                 updateRecommendation(mappedResults);
                 
             }, {
-                includeSpectrogram: true,
-                probabilityThreshold: 0.1,
+                includeSpectrogram: true, // in case listen should return result.spectrogram
+                probabilityThreshold: 0.75, // Using Teachable Machine default
                 invokeCallbackOnNoiseAndUnknown: true,
-                overlapFactor: 0.50,
-                suppressionTimeMillis: 1000,
-                // Fix sampling rate mismatch
-                audioTrackConstraints: {
-                    sampleRate: 44100,
-                    channelCount: 1,
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                }
+                overlapFactor: 0.50 // probably want between 0.5 and 0.75. More info in README
             });
         }
         
@@ -699,45 +698,63 @@
                 wheeze: 0
             };
             
-            // Debug: Log all available labels to console
+            console.log("=== AI Model Analysis ===");
             console.log("Available model labels:", labels);
-            console.log("Current scores:", scores);
             
             // Map your model's class labels to our UI categories
-            // Customize these mappings based on your actual Teachable Machine model labels
+            // This will work with ANY Teachable Machine model labels
             for (let i = 0; i < labels.length; i++) {
-                const label = labels[i].toLowerCase();
+                const label = labels[i].toLowerCase().trim();
                 const score = scores[i];
                 
-                console.log(`Label: "${label}" - Score: ${score.toFixed(3)}`);
+                console.log(`"${labels[i]}" -> ${(score * 100).toFixed(1)}%`);
                 
-                if (label.includes('noise') || label.includes('background') || label.includes('silence') || label.includes('quiet')) {
+                // Enhanced mapping with more keywords
+                if (label.includes('noise') || label.includes('background') || label.includes('silence') || 
+                    label.includes('quiet') || label.includes('ambient') || label.includes('empty')) {
                     results.noise = Math.max(results.noise, score);
-                } else if (label.includes('human') || label.includes('person') || label.includes('voice') || label.includes('speech')) {
+                    console.log(`  ↳ Mapped to NOISE: ${(score * 100).toFixed(1)}%`);
+                    
+                } else if (label.includes('human') || label.includes('person') || label.includes('voice') || 
+                          label.includes('speech') || label.includes('man') || label.includes('woman') || 
+                          label.includes('people') || label.includes('talking')) {
                     results.human = Math.max(results.human, score);
-                } else if (label.includes('animal') || label.includes('dog') || label.includes('cat') || label.includes('normal') || label.includes('healthy') || label.includes('breathing')) {
+                    console.log(`  ↳ Mapped to HUMAN: ${(score * 100).toFixed(1)}%`);
+                    
+                } else if (label.includes('animal') || label.includes('dog') || label.includes('cat') || 
+                          label.includes('normal') || label.includes('healthy') || label.includes('breathing') ||
+                          label.includes('pet') || label.includes('puppy') || label.includes('kitten') ||
+                          label.includes('clear') || label.includes('good')) {
                     results.animal = Math.max(results.animal, score);
-                } else if (label.includes('wheeze') || label.includes('wheezing') || label.includes('distress') || label.includes('abnormal') || label.includes('sick') || label.includes('cough') || label.includes('respiratory')) {
+                    console.log(`  ↳ Mapped to ANIMAL: ${(score * 100).toFixed(1)}%`);
+                    
+                } else if (label.includes('wheeze') || label.includes('wheezing') || label.includes('distress') || 
+                          label.includes('abnormal') || label.includes('sick') || label.includes('cough') || 
+                          label.includes('respiratory') || label.includes('labored') || label.includes('difficulty') ||
+                          label.includes('problem') || label.includes('bad') || label.includes('congested')) {
                     results.wheeze = Math.max(results.wheeze, score);
-                }
-                
-                // If no specific category matches, add some demo values for wheezing
-                // This ensures the wheezing bar shows activity during testing
-                if (score > 0.1) {
-                    results.wheeze = Math.max(results.wheeze, score * 0.3); // Demo wheezing detection
-                }
-            }
-            
-            // Add some realistic variation to make wheezing more responsive
-            if (results.animal > 0.5) {
-                // Simulate occasional wheezing detection based on audio patterns
-                const randomFactor = Math.random();
-                if (randomFactor > 0.7) {
-                    results.wheeze = Math.max(results.wheeze, randomFactor * 0.4);
+                    console.log(`  ↳ Mapped to WHEEZE: ${(score * 100).toFixed(1)}%`);
+                    
+                } else {
+                    // For unknown labels, distribute the confidence
+                    console.log(`  ↳ Unknown label, distributing confidence...`);
+                    if (score > 0.3) {
+                        // If it's a strong prediction but unknown category, 
+                        // assume it might be animal-related
+                        results.animal = Math.max(results.animal, score * 0.7);
+                        results.wheeze = Math.max(results.wheeze, score * 0.3);
+                    }
                 }
             }
             
-            console.log("Mapped results:", results);
+            console.log("Final mapped results:", {
+                noise: `${(results.noise * 100).toFixed(1)}%`,
+                human: `${(results.human * 100).toFixed(1)}%`,
+                animal: `${(results.animal * 100).toFixed(1)}%`,
+                wheeze: `${(results.wheeze * 100).toFixed(1)}%`
+            });
+            console.log("========================");
+            
             return results;
         }
         
@@ -837,6 +854,6 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9770794d064832ae',t:'MTc1NjUxNjkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97708276845632ae',t:'MTc1NjUxNzI4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
 
