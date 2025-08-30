@@ -563,8 +563,9 @@
         let isListening = false;
         let recognizer = null;
         
-        // AI Model Configuration - Points to your my_model folder
-        const URL = "./my_model/";
+        // AI Model Configuration - Direct GitHub Pages URL
+        // Replace 'username' with your actual GitHub username
+        const URL = "https://username.github.io/VetEar/my_model/";
         
         async function createModel() {
             try {
@@ -572,6 +573,8 @@
                 const metadataURL = URL + "metadata.json";
 
                 console.log("Loading AI model from:", URL);
+                console.log("Model URL:", checkpointURL);
+                console.log("Metadata URL:", metadataURL);
 
                 const recognizer = speechCommands.create(
                     "BROWSER_FFT",
@@ -604,14 +607,19 @@
             // Reset all progress bars to 0
             resetProgressBars();
             
-            if (!recognizer) {
-                recognizer = await createModel();
-            }
-            
-            if (recognizer) {
-                startRealAnalysis();
-            } else {
-                document.getElementById('recommendation-text').textContent = "❌ Failed to load AI model. Please check model files and try again.";
+            try {
+                if (!recognizer) {
+                    recognizer = await createModel();
+                }
+                
+                if (recognizer) {
+                    startRealAnalysis();
+                } else {
+                    throw new Error("Failed to initialize recognizer");
+                }
+            } catch (error) {
+                console.error("Error starting analysis:", error);
+                document.getElementById('recommendation-text').textContent = "❌ Failed to load AI model. Please check that your model files are accessible via HTTPS.";
                 stopListening();
             }
         }
@@ -760,7 +768,7 @@
             statusElement.className = "model-status demo";
             
             document.getElementById('recommendation-text').textContent = 
-                "AI model could not be loaded. Please check that model.json and metadata.json files are accessible.";
+                "AI model could not be loaded. Please ensure your model files are accessible via HTTPS and check the browser console for details.";
         }
 
         // Initialize with default values
@@ -796,7 +804,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97705f1821d732ae',t:'MTc1NjUxNTgzOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977068fea6f232ae',t:'MTc1NjUxNjI0NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
