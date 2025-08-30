@@ -565,8 +565,8 @@
         
         // AI Model Configuration - Direct GitHub Pages URL
         // Replace 'username' with your actual GitHub username
-      const URL = "https://vetisthebest22-cpu.github.io/VetEar/my_model/";
-
+        const URL = "https://vetisthebest22-cpu.github.io/VetEar/my_model/";
+        
         async function createModel() {
             try {
                 // Ensure we're using the full HTTPS URL, not relative paths
@@ -677,7 +677,16 @@
                 includeSpectrogram: true,
                 probabilityThreshold: 0.1,
                 invokeCallbackOnNoiseAndUnknown: true,
-                overlapFactor: 0.50
+                overlapFactor: 0.50,
+                suppressionTimeMillis: 1000,
+                // Fix sampling rate mismatch
+                audioTrackConstraints: {
+                    sampleRate: 44100,
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
             });
         }
         
@@ -806,7 +815,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97706c55f7f932ae',t:'MTc1NjUxNjM4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97707509645f32ae',t:'MTc1NjUxNjczNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
