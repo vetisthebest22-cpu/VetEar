@@ -560,13 +560,23 @@
         let isListening = false;
         let recognizer = null;
         
-        // AI Model Configuration - Update this path to your model location
-        const URL = "./my_model/";
+        // AI Model Configuration - Update this URL to your hosted model location
+        // For local testing, you need to serve your model via HTTP server
+        // Example: "https://your-domain.com/my_model/" or "http://localhost:8000/my_model/"
+        const URL = "https://teachablemachine.withgoogle.com/models/YOUR_MODEL_ID/";
         
         async function createModel() {
             try {
+                // Check if URL is properly configured
+                if (URL.includes("YOUR_MODEL_ID")) {
+                    console.log("Please update the URL variable with your actual Teachable Machine model URL");
+                    return null;
+                }
+
                 const checkpointURL = URL + "model.json";
                 const metadataURL = URL + "metadata.json";
+
+                console.log("Loading model from:", URL);
 
                 const recognizer = speechCommands.create(
                     "BROWSER_FFT",
@@ -575,9 +585,10 @@
                     metadataURL);
 
                 await recognizer.ensureModelLoaded();
+                console.log("Model loaded successfully!");
                 return recognizer;
             } catch (error) {
-                console.log("Model loading failed, using demo mode:", error);
+                console.log("Model loading failed, using demo mode:", error.message);
                 return null;
             }
         }
@@ -835,6 +846,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977043ced2dd32ae',t:'MTc1NjUxNDcyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9770477e62f232ae',t:'MTc1NjUxNDg3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
